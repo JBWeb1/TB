@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>For Tammeryn 💌</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Dancing Script', cursive;}
+body{
+    height:100vh;
+    background:linear-gradient(180deg,#ffd6e8,#fff8f0);
+    overflow:hidden;
+    touch-action: manipulation;
+}
+.game{
+    width:100%;
+    height:100%;
+    position:relative;
+}
+.top{
+    position:absolute;
+    top:15px;
+    width:100%;
+    text-align:center;
+    font-size:1.4rem;
+    color:#ff4d6d;
+    padding: 0 5px;
+}
+.character{
+    position:absolute;
+    bottom:20px;
+    left:20px;
+    font-size:80px;
+}
+.item{
+    position:absolute;
+    font-size:55px;
+    cursor:pointer;
+    animation:fall linear;
+    touch-action: manipulation;
+}
+@keyframes fall{
+    from{transform:translateY(-15vh);}
+    to{transform:translateY(110vh);}
+}
+.balloon{
+    position:absolute;
+    font-size:65px;
+    cursor:pointer;
+    animation:rise linear;
+    touch-action: manipulation;
+}
+@keyframes rise{
+    from{transform:translateY(110vh);}
+    to{transform:translateY(-15vh);}
+}
+
+/* Envelope */
+.envelope{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%) scale(1);
+    font-size:90px;
+    cursor:pointer;
+    transition:0.5s;
+    z-index:10;
+    display:none;
+}
+.envelope.opened{
+    transform:translate(-50%,-50%) scale(1.2) rotateX(180deg);
+}
+
+/* Note */
+.note{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%) scale(0);
+    background:#fffdf2;
+    padding:25px;
+    width:90%;
+    max-width:400px;
+    border-radius:20px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.25);
+    text-align:left;
+    transition:0.5s;
+    z-index:20;
+    line-height:1.6;
+    font-size:1.1rem;
+}
+.note.show{transform:translate(-50%,-50%) scale(1);}
+.note h1{color:#b8396f;margin-bottom:12px;font-size:1.4rem;}
+.note p{color:#333;font-size:1.05rem;}
+.hidden-proposal{
+    color:#b8396f;
+    text-decoration:underline;
+    cursor:pointer;
+    font-weight:bold;
+}
+button{
+    margin-top:15px;
+    padding:12px 20px;
+    border:none;
+    border-radius:20px;
+    background:#b8396f;
+    color:white;
+    font-size:1rem;
+    cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="game" id="game">
+    <div class="top" id="info">Level 1: Collect the flowers 🌸 (0/5)</div>
+    <div class="character">🧍‍♂️</div>
+
+    <div class="envelope" id="envelope" onclick="openEnvelope()">📜</div>
+
+    <div class="note" id="note">
+        <h1>To My Dearest Tammeryn,</h1>
+        <p>
+            Happy New Year, my love.  
+            As the clock strikes twelve and the world turns anew, I wanted to give you this timeless note — something from the heart, written like the old days, to tell you how truly precious you are to me.
+            <br><br>
+            Each flower and every heart you helped me collect is a small token of the love I carry for you. You are the warmth of my mornings, the calm of my nights, and the joy in every moment.  
+            <br><br>
+            Tammeryn, my love, may this year bring us endless laughter, endless dreams, and endless closeness. I promise to always cherish you, to walk beside you through every sunrise and sunset, and to keep my heart yours, always.
+            <br><br>
+            Tap this <span class="hidden-proposal" onclick="showProposal()">here</span> for a very special surprise 💍
+        </p>
+        <button onclick="final()">Hold me close 🌸</button>
+    </div>
+</div>
+
+<script>
+let level = 1;
+let collected = 0;
+let needed = 5;
+let envelopeOpened = false;
+
+const info = document.getElementById("info");
+const game = document.getElementById("game");
+const envelope = document.getElementById("envelope");
+const note = document.getElementById("note");
+
+// Spawn flowers and hearts
+function spawn(symbol){
+    const i = document.createElement("div");
+    i.className="item";
+    i.innerHTML=symbol;
+    i.style.left=Math.random()*90+"vw";
+    i.style.animationDuration=(Math.random()*2+3)+"s";
+
+    i.ontouchstart = i.onclick = ()=>{
+        collected++;
+        i.remove();
+        update();
+    };
+
+    game.appendChild(i);
+    setTimeout(()=>i.remove(),5000);
+}
+
+function spawnBalloon(){
+    const b = document.createElement("div");
+    b.className="balloon";
+    b.innerHTML="🎈";
+    b.style.left=Math.random()*90+"vw";
+    b.style.animationDuration=(Math.random()*3+2)+"s";
+
+    b.ontouchstart = b.onclick = ()=>{
+        collected++;
+        b.remove();
+        update();
+    };
+
+    game.appendChild(b);
+    setTimeout(()=>b.remove(),5000);
+}
+
+function update(){
+    if(level===1){
+        info.innerText=`Level ${level}: Collect the flowers 🌸 (${collected}/${needed})`;
+    } else if(level===2){
+        info.innerText=`Level ${level}: Catch the hearts ❤️ (${collected}/${needed})`;
+    } else if(level===3){
+        info.innerText=`Level ${level}: Pop the balloons 🎈 (${collected}/${needed})`;
+    }
+
+    if(collected>=needed){
+        nextLevel();
+    }
+}
+
+function nextLevel(){
+    collected=0;
+    level++;
+
+    if(level===2){
+        needed=7;
+        info.innerText="Level 2: Catch the hearts ❤️ (0/7)";
+    } else if(level===3){
+        needed=10;
+        info.innerText="Level 3: Pop the balloons 🎈 (0/10)";
+    } else {
+        winGame();
+    }
+}
+
+function winGame(){
+    info.innerText="You did it 💖 Tap the envelope to open your letter";
+    envelope.style.display="block";
+}
+
+function openEnvelope(){
+    if(!envelopeOpened){
+        envelope.classList.add("opened");
+        envelopeOpened = true;
+        envelope.innerText="✉️";
+    } else {
+        envelope.style.display="none";
+        note.classList.add("show");
+    }
+}
+
+function showProposal(){
+    note.innerHTML+=`
+        <h1>💍 Surprise!</h1>
+        <p>Tammeryn Bowers, will you make me the happiest man alive and be my forever? ❤️</p>
+    `;
+}
+
+function final(){
+    note.innerHTML=`
+        <h1>❤️</h1>
+        <p>
+            No matter what this year brings, Tammeryn,  
+            I’ll always be by your side, loving you more each day.  
+            You are my everything, my heart, my forever.
+        </p>
+    `;
+}
+
+// Spawn items per level
+setInterval(()=>{
+    if(level===1) spawn("🌸");
+    if(level===2) spawn("❤️");
+    if(level===3) spawnBalloon();
+},900);
+
+</script>
+</body>
+</html>
